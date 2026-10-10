@@ -1,5 +1,5 @@
 # A tool is just a Python function!
-# Create an API key from aistudio.google.com
+# Create an API key from aistudio.google.com or console.groq.com
 # Add it to a .env file in the same directory
 # Add a .gitignore file to ignore the .env file
 ################################################################################################################################
