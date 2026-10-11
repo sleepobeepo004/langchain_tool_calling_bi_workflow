@@ -89,18 +89,25 @@ On Q1 the agent scored **0.5/1**. Every number was correct, but the conclusion w
 
 ## Key learnings
 
-1. **Ratios must be rebuilt from totals.** Averaging CAC, ROAS or churn across months weights small months the same as big ones. Use `SUM(spend) / SUM(users)`, not `AVG(cac)`.
-2. **Show the agent real example rows.** It stopped guessing formats (`'Dec'` vs `'2023-12'`) once `list_tables` included sample data.
-3. **Accurate numbers can still mislead.** The hardest errors to catch were a wrong baseline and a missing total, not bad math.
-4. **Efficiency has to be designed in.** LLM agents explore step by step and don't feel the cost of extra queries. Without planning rules and limits, they over-query.
-5. **Evaluation questions need to be precise too.** In run 1, one "wrong" answer was really an ambiguous question.
+1. **The agent knows business terms, not how *this* company calculates them.** It knew what CAC means but averaged the precomputed `cac_usd` column instead of rebuilding it from totals (`SUM(spend) / SUM(new_users)`). It also had no way of knowing `revenue_usd` only covers newly acquired users. Company-specific definitions have to be supplied, ideally through a semantic layer of agreed metrics.
+2. **Tools shape what the agent can see.** Adding 2 example rows to `list_tables` ended the date-format guessing (`'Dec'` vs. `'2023-12'`). Tool docstrings work as instructions: "Call this first" is why every trace starts with `list_tables`.
+3. **Correct numbers can still lead to a wrong conclusion.** The hardest errors to catch were analytical, not mathematical: comparing against a seasonally lower period, and never checking the company-wide total.
+4. **Efficiency has to be designed in.** The agent explores step by step and doesn't feel the cost of extra queries, so it ran 7 queries where one `GROUP BY` with `CASE WHEN` would do. Since every step resends the whole conversation, this drives up token use.
+5. **Evaluation questions need to be precise too.** In run 1, one "wrong" answer came from an ambiguous question (absolute vs. % growth), not an agent mistake.
 
-## Limitations and next steps
+## Limitations
 
-- **Small evaluation set.** Five questions per run is enough to show patterns, not to prove reliability.
-- **Free-tier models.** Daily rate limits shaped how often I could run tests, and run 3 used a different model (Gemini) than runs 1–2 (Groq).
-- **Next:** pre-built metric tools (e.g. `compare_periods(channel, metric, period_a, period_b)`) so the agent chooses the analysis and vetted code runs it, plus a Streamlit chat interface.
+- **Small evaluation set:** five questions per run shows patterns, not reliability. Run 3 is complete for Q1 only.
+- **Model change:** runs 1–2 used `gpt-oss-120b` (Groq) and run 3 used Gemini after free-tier limits ran out, so run 3 differs in both prompts and model.
+- **Silent truncation:** `run_sql` caps results at 50 rows without telling the agent. The cap was hit twice (run 2, Q3 and Q4: 80 and 96 rows), but both final answers came from follow-up summary queries and matched the pandas-verified values.
+- **Unused chart tool:** `make_chart` was built for a future interface; the agent never called it in the terminal-based evaluation.
 
+## Next Steps
+- **Metric definitions:** a short data dictionary (meaning plus formula per column) returned by `list_tables`, so definitions sit next to the data.
+- **Metric tools:** e.g. `compare_periods(channel, metric, period_a, period_b)`, so the agent picks the analysis and tested code does the math.
+- **Truncation warning:** return the true row count when results are cut off and tell the agent to aggregate in SQL.
+- **Efficiency limits:** a step limit and a plan-first rule to reduce redundant queries.
+- **Streamlit chat interface:** a front end for non-technical users, which would also give `make_chart` a purpose.
 ---
 
 ## Run it yourself
