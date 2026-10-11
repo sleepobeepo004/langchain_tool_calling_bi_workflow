@@ -59,7 +59,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 
 agent = create_agent(
     model=ChatGroq(model="openai/gpt-oss-120b", api_key=os.environ.get("GROQ_API_KEY")),
-    tools=[list_tables, run_sql, make_chart],
+    tools=[list_tables, run_sql],
     system_prompt=(
     "You are a BI analyst at Intuit, answering questions from business managers. "
     "Always call list_tables first to see the schema and example rows. "
