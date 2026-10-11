@@ -89,7 +89,7 @@ On Q1 the agent scored **0.5/1**. Every number was correct, but the conclusion w
 
 ## Key learnings
 
-1. **The agent knows business terms, not how *this* company calculates them.** It knew what CAC means but averaged the precomputed `cac_usd` column instead of rebuilding it from totals (`SUM(spend) / SUM(new_users)`). It also had no way of knowing `revenue_usd` only covers newly acquired users. Company-specific definitions have to be supplied, ideally through a semantic layer of agreed metrics.
+1. *1. **Knowing what a number means isn't the same as adding it up correctly.** The agent knew that CAC is the cost of winning one new customer, and it found the right column. But it averaged the monthly costs together, so a slow month counted just as much as a busy one. The right way is to divide total marketing spend by total new customers. The agent also couldn't know things the data doesn't say, such as the revenue column only counting new customers. Clear
 2. **Tools shape what the agent can see.** Adding 2 example rows to `list_tables` ended the date-format guessing (`'Dec'` vs. `'2023-12'`). Tool docstrings work as instructions: "Call this first" is why every trace starts with `list_tables`.
 3. **Correct numbers can still lead to a wrong conclusion.** The hardest errors to catch were analytical, not mathematical: comparing against a seasonally lower period, and never checking the company-wide total.
 4. **Efficiency has to be designed in.** The agent explores step by step and doesn't feel the cost of extra queries, so it ran 7 queries where one `GROUP BY` with `CASE WHEN` would do. Since every step resends the whole conversation, this drives up token use.
