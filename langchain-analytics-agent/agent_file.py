@@ -40,21 +40,7 @@ def run_sql(query: str) -> str:
         return df.head(50).to_string(index=False) if len(df) else "Query returned no rows."
     except Exception as e:
         return f"SQL error: {e}. Fix the query and try again."
-
-
-@tool
-def make_chart(query: str, chart_type: str, x: str, y: str, title: str) -> str:
-    """Run a SELECT query and save a chart as a PNG.
-    chart_type is 'bar' or 'line'. x and y are column names from the query result."""
-    try:
-        df = pd.read_sql_query(query, conn)
-        df.plot(kind=chart_type, x=x, y=y, title=title, legend=False, figsize=(8, 4))
-        os.makedirs("charts", exist_ok=True)
-        path = f"charts/{title.replace(' ', '_')}.png"
-        plt.tight_layout(); plt.savefig(path); plt.close()
-        return f"Chart saved to {path}"
-    except Exception as e:
-        return f"Chart error: {e}"
+        
 ################################################################################################################################
 # making the llm agent
 
