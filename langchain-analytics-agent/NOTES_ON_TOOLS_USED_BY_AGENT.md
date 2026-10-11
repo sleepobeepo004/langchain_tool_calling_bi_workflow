@@ -13,9 +13,9 @@ Limitation: LLMs learn common business terms (CAC, ROAS, churn, ARPU) and their 
 # Tool 2: run_sql
 ## Function: lets the agent compute by running any SELECT query and returns up to 50 rows at once or an error message. The errors come back as text (“Fix the query and try again”), so the agent can correct itself instead of crashing. 
 
-Positive: it accepts any SQL.
-Negative: that flexibility is also why the agent fragments its work. Nothing encourages one well-planned query, so it explores step by step.
-Risk: cuts results off without telling the model. If a query returns 200 rows, the agent sees 50 and has no idea the rest exist, so it could add up partial data and report a wrong total. 50 was a cap to balance 2 things: cost and hidden answers. 
+#### Positive: it accepts any SQL.
+#### Negative: that flexibility is also why the agent fragments its work. Nothing encourages one well-planned query, so it explores step by step.
+#### Risk: cuts results off without telling the model. If a query returns 200 rows, the agent sees 50 and has no idea the rest exist, so it could add up partial data and report a wrong total. 50 was a cap to balance 2 things: cost and hidden answers. 
 
 Did this affect the evaluation results? No.
 The 50-row cap was hit twice (test 2, Q3 and Q4 at 80 and 96 rows). Neither changed the answers. In both cases, the agent’s next query summarized the data in SQL (GROUP BY region → 8 rows), and the final numbers came from that summary. Both final answers matched the values calculated in pandas, so the evaluation results stand. Every other query in all three runs returned 50 rows or fewer, because the queries were summaries (grouped by year, channel or region) or were filtered to a small slice. The agent happened to summarize afterwards. Nothing in the tool made it do that, and a different model or question could easily have used the truncated rows directly.
